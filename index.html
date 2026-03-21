@@ -605,19 +605,24 @@ Tự luận:
 ${tmpl.essay}`
     : `Dùng cấu trúc sau:\n${tmpl[type]}`;
 
-  return `Bạn là chuyên gia chuyển đổi đề thi toán Việt Nam sang LaTeX dùng gói ex_text.
+  return `Bạn là chuyên gia chuyển đổi đề thi toán Việt Nam sang LaTeX chuẩn, dùng gói ex_text. Đọc TOÀN BỘ ảnh và chuyển ĐẦY ĐỦ mọi nội dung, KHÔNG bỏ sót câu nào.
 
 ${guide}
 
 Quy tắc bắt buộc:
-- Chỉ xuất code LaTeX thuần túy, KHÔNG giải thích, KHÔNG markdown backtick, KHÔNG dấu \`\`\`
-- Giữ nguyên nội dung câu hỏi từ ảnh, chuyển đổi chính xác
-- Công thức toán: $...$ (inline) hoặc \\[...\\] (display)
-- Nếu không có lời giải trong ảnh → \\loigiai{} để trống
-- Nếu có nhiều câu hỏi → xuất tất cả liên tiếp, mỗi câu một \\begin{ex}...\\end{ex}
-- Dùng amsmath, amssymb khi cần
+- Chỉ xuất LaTeX thuần, KHÔNG giải thích, KHÔNG backtick, KHÔNG dấu \`\`\`
+- Sao chép CHÍNH XÁC văn bản tiếng Việt, tiêu đề dùng \textbf{}
+- Công thức inline: $...$  |  display: \[...\]
+- Phân số \frac{}{}, tổng \sum, tích \prod, tích phân \int
+- Chỉ số: ^{} và _{}, dấu ngoặc lớn: \left( \right)
+- \mathbb{R}, \mathbb{Q}, \cap, \cup, \setminus, \in, \leq, \geq, \infty
+- Hệ phương trình dùng \begin{cases}...\end{cases}
+- Mỗi BÀI/câu → 1 \begin{ex}...\end{ex} riêng
+- Câu con (a)(b)(c) → \begin{enumerate}[a)]\item...\end{enumerate} bên trong ex
+- \loigiai{} để trống nếu không có lời giải
+- PHẢI xuất ĐỦ tất cả, không dừng giữa chừng
 
-Xuất code LaTeX ngay bây giờ:`;
+Xuất LaTeX đầy đủ:`;
 }
 
 // Convert using Gemini API
@@ -646,7 +651,7 @@ btnConvert.addEventListener('click', async () => {
         }],
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 2048
+          maxOutputTokens: 8192
         }
       })
     });
