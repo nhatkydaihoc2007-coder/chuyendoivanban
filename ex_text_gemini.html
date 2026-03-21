@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image → ex_text LaTeX</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f3ee;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: #ddd9d0;
+  --accent: #1a472a;
+  --accent-light: #e8f0ea;
+  --accent2: #c8860a;
+  --text: #1c1917;
+  --muted: #78716c;
+  --code-bg: #1c1917;
+  --code-text: #a8d5b5;
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+  --success: #15803d;
+  --google-blue: #4285f4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Be Vietnam Pro', sans-serif;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23f5f3ee'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23ece9e2' opacity='0.4'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+header {
+  grid-column: 1 / -1;
+  background: var(--accent);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--accent2);
+}
+
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 34px; height: 34px;
+  background: var(--accent2);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+}
+.logo-text h1 { font-size: 1rem; font-weight: 700; color: #fff; }
+.logo-text p {
+  font-size: 0.68rem; color: rgba(255,255,255,0.5);
+  font-family: 'IBM Plex Mono', monospace; margin-top: 1px;
+}
+
+.api-wrap {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.api-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(66,133,244,0.2);
+  border: 1px solid rgba(66,133,244,0.4);
+  border-radius: 6px;
+  padding: 4px 10px;
+}
+.api-badge .g-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #4285f4;
+  box-shadow: 0 0 6px #4285f4;
+}
+.api-badge span {
+  font-size: 0.68rem;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #90bbfa;
+  white-space: nowrap;
+}
+
+.api-wrap label {
+  font-size: 0.7rem; color: rgba(255,255,255,0.55);
+  font-family: 'IBM Plex Mono', monospace; white-space: nowrap;
+}
+
+#apiKey {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px; color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem; padding: 6px 10px; width: 270px;
+  outline: none; transition: border-color 0.15s;
+}
+#apiKey::placeholder { color: rgba(255,255,255,0.3); }
+#apiKey:focus { border-color: #4285f4; }
+
+.btn-get-key {
+  background: #4285f4;
+  border: none; border-radius: 6px;
+  color: #fff; font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.72rem; font-weight: 600;
+  padding: 6px 11px; cursor: pointer;
+  white-space: nowrap; transition: background 0.15s;
+  text-decoration: none; display: inline-block; line-height: 1.4;
+}
+.btn-get-key:hover { background: #3574e2; }
+
+/* ── Left panel ── */
+.left-panel {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 22px; display: flex;
+  flex-direction: column; gap: 18px; overflow-y: auto;
+}
+
+.section-label {
+  font-size: 0.67rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 7px;
+}
+
+/* Upload zone */
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: 12px;
+  padding: 26px 16px; text-align: center; cursor: pointer;
+  transition: all 0.15s; position: relative; background: var(--surface2);
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--accent); background: var(--accent-light);
+}
+.upload-zone input { display: none; }
+.upload-icon { font-size: 30px; margin-bottom: 9px; display: block; }
+.upload-zone h3 { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.upload-zone p { font-size: 0.73rem; color: var(--muted); }
+
+.kbd {
+  display: inline-block; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 5px; font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem; color: var(--text); margin: 0 1px;
+}
+
+/* Preview */
+.preview-box { display: none; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.preview-box.visible { display: block; }
+.preview-box img {
+  width: 100%; max-height: 190px; object-fit: contain;
+  background: var(--surface2); display: block;
+}
+.preview-meta {
+  padding: 7px 11px; background: var(--surface);
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+.preview-meta span {
+  font-size: 0.73rem; color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+}
+.btn-sm {
+  background: none; border: 1px solid var(--border); border-radius: 5px;
+  color: var(--muted); font-size: 0.68rem; padding: 3px 7px;
+  cursor: pointer; font-family: 'Be Vietnam Pro', sans-serif;
+  transition: all 0.12s; flex-shrink: 0;
+}
+.btn-sm:hover { border-color: var(--danger); color: var(--danger); }
+
+/* Model selector */
+.model-row {
+  display: flex; gap: 6px;
+}
+.model-btn {
+  flex: 1; padding: 7px 6px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 8px; cursor: pointer; text-align: center;
+  font-family: 'Be Vietnam Pro', sans-serif; transition: all 0.12s;
+}
+.model-btn:hover { border-color: var(--google-blue); }
+.model-btn.active {
+  border-color: var(--google-blue);
+  background: #eef3fe;
+  box-shadow: inset 0 0 0 1px var(--google-blue);
+}
+.model-btn .mb-name { font-size: 0.73rem; font-weight: 600; color: var(--text); }
+.model-btn.active .mb-name { color: var(--google-blue); }
+.model-btn .mb-note { font-size: 0.63rem; color: var(--muted); margin-top: 1px; }
+.model-btn.active .mb-note { color: #6fa4f8; }
+
+/* Type grid */
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.type-card {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; cursor: pointer;
+  transition: all 0.12s; text-align: left;
+}
+.type-card:hover { border-color: var(--accent); background: var(--accent-light); }
+.type-card.active {
+  border-color: var(--accent); background: var(--accent-light);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.tc-title { font-size: 0.76rem; font-weight: 600; color: var(--text); }
+.type-card.active .tc-title { color: var(--accent); }
+.tc-cmd { font-size: 0.63rem; font-family: 'IBM Plex Mono', monospace; color: var(--muted); margin-top: 2px; }
+.type-card.active .tc-cmd { color: var(--accent); opacity: 0.7; }
+
+/* Convert btn */
+.btn-convert {
+  width: 100%; background: var(--accent); color: #fff;
+  border: none; border-radius: 10px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.88rem; font-weight: 700; padding: 12px;
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border-bottom: 3px solid rgba(0,0,0,0.2);
+}
+.btn-convert:hover:not(:disabled) { background: #1e5230; transform: translateY(-1px); }
+.btn-convert:active:not(:disabled) { transform: translateY(1px); border-bottom-width: 1px; }
+.btn-convert:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.spinner {
+  width: 15px; height: 15px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: none;
+}
+.btn-convert.loading .btn-label { display: none; }
+.btn-convert.loading .spinner { display: block; }
+
+.paste-hint { text-align: center; font-size: 0.7rem; color: var(--muted); }
+
+/* ── Right panel ── */
+.right-panel { display: flex; flex-direction: column; overflow: hidden; }
+
+.right-header {
+  padding: 14px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); flex-shrink: 0;
+}
+
+.output-actions { display: flex; gap: 7px; }
+.btn-action {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; color: var(--text);
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+  padding: 5px 11px; cursor: pointer; transition: all 0.12s;
+  display: flex; align-items: center; gap: 4px;
+}
+.btn-action:hover { border-color: var(--accent); color: var(--accent); }
+.btn-action.copied { border-color: var(--success); color: var(--success); }
+
+.output-body {
+  flex: 1; overflow-y: auto; padding: 22px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.empty-state {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; color: var(--muted); text-align: center;
+}
+.empty-state .es-icon { font-size: 44px; opacity: 0.3; }
+.empty-state h3 { font-size: 0.88rem; font-weight: 600; }
+.empty-state p { font-size: 0.78rem; line-height: 1.6; }
+
+/* Code block */
+.code-block { background: var(--code-bg); border-radius: 12px; overflow: hidden; animation: slideIn 0.3s ease; }
+.code-header {
+  padding: 9px 15px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.code-lang { font-size: 0.66rem; font-family: 'IBM Plex Mono', monospace; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.1em; }
+.code-dots { display: flex; gap: 5px; }
+.code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.code-dots span:nth-child(1) { background: #ff5f57; }
+.code-dots span:nth-child(2) { background: #febc2e; }
+.code-dots span:nth-child(3) { background: #28c840; }
+
+pre {
+  padding: 18px; font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem; line-height: 1.85; color: var(--code-text);
+  white-space: pre-wrap; word-break: break-all; overflow-x: auto;
+}
+
+.lt-cmd { color: #79d4ff; }
+.lt-env { color: #ffb347; }
+.lt-brace { color: rgba(255,255,255,0.45); }
+
+.error-box {
+  background: var(--danger-bg); border: 1px solid #fca5a5;
+  border-radius: 10px; padding: 11px 15px; color: var(--danger);
+  font-size: 0.8rem; display: flex; gap: 8px; align-items: flex-start;
+  animation: slideIn 0.3s ease;
+}
+
+/* Cheatsheet */
+.cheatsheet { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.cs-header {
+  padding: 9px 14px; background: var(--surface2); border-bottom: 1px solid var(--border);
+  font-size: 0.68rem; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.cs-grid { display: grid; grid-template-columns: 1fr 1fr; }
+.cs-item {
+  padding: 10px 13px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);
+}
+.cs-item:nth-child(even) { border-right: none; }
+.cs-item:nth-last-child(-n+2) { border-bottom: none; }
+.cs-name { font-size: 0.7rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.cs-code { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: var(--accent); line-height: 1.55; }
+
+/* free badge */
+.free-tag {
+  display: inline-block;
+  background: #e6f4ea; color: #1e7e34;
+  border: 1px solid #a8d5b5;
+  border-radius: 4px; padding: 1px 6px;
+  font-size: 0.6rem; font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.06em; vertical-align: middle; margin-left: 4px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+@media (max-width: 680px) {
+  .layout { grid-template-columns: 1fr; }
+  .left-panel { border-right: none; border-bottom: 1px solid var(--border); }
+  #apiKey { width: 140px; }
+  .api-badge { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">📐</div>
+      <div class="logo-text">
+        <h1>Image → ex_text LaTeX</h1>
+        <p>Powered by Google Gemini AI</p>
+      </div>
+    </div>
+    <div class="api-wrap">
+      <div class="api-badge">
+        <div class="g-dot"></div>
+        <span>Google AI Studio</span>
+      </div>
+      <label>API KEY</label>
+      <input type="password" id="apiKey" placeholder="AIzaSy...">
+      <a class="btn-get-key" href="https://aistudio.google.com/apikey" target="_blank">Lấy key miễn phí →</a>
+    </div>
+  </header>
+
+  <!-- Left panel -->
+  <div class="left-panel">
+
+    <!-- Upload -->
+    <div>
+      <div class="section-label">Hình ảnh</div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/*">
+        <span class="upload-icon">🖼️</span>
+        <h3>Kéo thả hoặc click để chọn</h3>
+        <p>Hoặc nhấn <span class="kbd">Ctrl</span>+<span class="kbd">V</span> để paste</p>
+        <p style="margin-top:3px;font-size:0.68rem">PNG · JPG · WEBP · tối đa 10MB</p>
+      </div>
+      <div class="preview-box" id="previewBox">
+        <img id="previewImg" src="" alt="preview">
+        <div class="preview-meta">
+          <span id="previewName">—</span>
+          <button class="btn-sm" id="btnRemove">✕ Xoá</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model -->
+    <div>
+      <div class="section-label">Model <span class="free-tag">FREE</span></div>
+      <div class="model-row">
+        <div class="model-btn active" data-model="gemini-2.0-flash">
+          <div class="mb-name">Gemini 2.0 Flash</div>
+          <div class="mb-note">Nhanh · Miễn phí</div>
+        </div>
+        <div class="model-btn" data-model="gemini-1.5-pro">
+          <div class="mb-name">Gemini 1.5 Pro</div>
+          <div class="mb-note">Mạnh hơn · Free tier</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Type selector -->
+    <div>
+      <div class="section-label">Loại câu hỏi</div>
+      <div class="type-grid">
+        <div class="type-card active" data-type="auto">
+          <div class="tc-title">🤖 Tự động</div>
+          <div class="tc-cmd">AI nhận dạng</div>
+        </div>
+        <div class="type-card" data-type="mc">
+          <div class="tc-title">🔘 Trắc nghiệm</div>
+          <div class="tc-cmd">\choice{}{}{}{}</div>
+        </div>
+        <div class="type-card" data-type="tf">
+          <div class="tc-title">✓✗ Đúng / Sai</div>
+          <div class="tc-cmd">\choiceTFt{}{}{}{}</div>
+        </div>
+        <div class="type-card" data-type="short">
+          <div class="tc-title">✏️ Trả lời ngắn</div>
+          <div class="tc-cmd">\shortans{}</div>
+        </div>
+        <div class="type-card" data-type="essay" style="grid-column:1/-1">
+          <div class="tc-title">📝 Tự luận</div>
+          <div class="tc-cmd">\begin{ex}...\loigiai{}\end{ex}</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-convert" id="btnConvert" disabled>
+      <span class="btn-label">⚡ Chuyển sang LaTeX</span>
+      <div class="spinner"></div>
+    </button>
+
+    <p class="paste-hint"><span class="kbd">Ctrl</span>+<span class="kbd">V</span> bất cứ lúc nào để paste ảnh mới</p>
+
+  </div>
+
+  <!-- Right panel -->
+  <div class="right-panel">
+    <div class="right-header">
+      <div class="section-label" style="margin:0">Kết quả LaTeX</div>
+      <div class="output-actions">
+        <button class="btn-action" id="btnCopy" style="display:none">⎘ Copy</button>
+        <button class="btn-action" id="btnClear" style="display:none">✕ Xoá</button>
+      </div>
+    </div>
+
+    <div class="output-body" id="outputBody">
+      <div class="empty-state" id="emptyState">
+        <div class="es-icon">📋</div>
+        <h3>Chưa có kết quả</h3>
+        <p>Chọn ảnh rồi bấm Chuyển sang LaTeX<br>hoặc <kbd style="font-family:monospace;font-size:0.75rem">Ctrl+V</kbd> để paste ảnh nhanh</p>
+      </div>
+      <div id="resultArea"></div>
+      <div class="cheatsheet" id="cheatsheet">
+        <div class="cs-header">Cấu trúc gói ex_text</div>
+        <div class="cs-grid">
+          <div class="cs-item">
+            <div class="cs-name">Trắc nghiệm 4 PA</div>
+            <div class="cs-code">\begin{ex}<br>Câu hỏi<br>\choice{A}{B}{C}{D}<br>\loigiai{}<br>\end{ex}</div>
+          </div>
+          <div class="cs-item">
+            <div class="cs-name">Đúng / Sai</div>
+            <div class="cs-code">\begin{ex}<br>Câu hỏi<br>\choiceTFt{A}{B}{C}{D}<br>\loigiai{}<br>\end{ex}</div>
+          </div>
+          <div class="cs-item">
+            <div class="cs-name">Trả lời ngắn</div>
+            <div class="cs-code">\begin{ex}<br>Câu hỏi<br>\shortans{đáp án}<br>\loigiai{}<br>\end{ex}</div>
+          </div>
+          <div class="cs-item">
+            <div class="cs-name">Tự luận</div>
+            <div class="cs-code">\begin{ex}<br>Câu hỏi<br>\loigiai{lời giải}<br>\end{ex}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const uploadZone  = document.getElementById('uploadZone');
+const fileInput   = document.getElementById('fileInput');
+const previewBox  = document.getElementById('previewBox');
+const previewImg  = document.getElementById('previewImg');
+const previewName = document.getElementById('previewName');
+const btnRemove   = document.getElementById('btnRemove');
+const btnConvert  = document.getElementById('btnConvert');
+const resultArea  = document.getElementById('resultArea');
+const emptyState  = document.getElementById('emptyState');
+const btnCopy     = document.getElementById('btnCopy');
+const btnClear    = document.getElementById('btnClear');
+const apiKeyInp   = document.getElementById('apiKey');
+const cheatsheet  = document.getElementById('cheatsheet');
+
+let b64 = null, mime = null, qtype = 'auto', model = 'gemini-2.0-flash';
+
+// Persist API key
+const saved = localStorage.getItem('gemini_apikey');
+if (saved) apiKeyInp.value = saved;
+apiKeyInp.addEventListener('change', () => localStorage.setItem('gemini_apikey', apiKeyInp.value.trim()));
+
+// Model buttons
+document.querySelectorAll('.model-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.model-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    model = b.dataset.model;
+  });
+});
+
+// Type cards
+document.querySelectorAll('.type-card').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.type-card').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    qtype = c.dataset.type;
+  });
+});
+
+// File load
+function loadFile(file) {
+  if (!file || !file.type.startsWith('image/')) { showError('Vui lòng chọn file ảnh hợp lệ.'); return; }
+  if (file.size > 10 * 1024 * 1024) { showError('File quá lớn, tối đa 10MB.'); return; }
+  const r = new FileReader();
+  r.onload = e => {
+    const src = e.target.result;
+    b64 = src.split(',')[1]; mime = file.type;
+    previewImg.src = src;
+    previewName.textContent = file.name;
+    previewBox.classList.add('visible');
+    btnConvert.disabled = false;
+    clearResult();
+  };
+  r.readAsDataURL(file);
+}
+
+uploadZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); loadFile(e.dataTransfer.files[0]); });
+document.addEventListener('paste', e => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const it of items) { if (it.type.startsWith('image/')) { loadFile(it.getAsFile()); break; } }
+});
+
+btnRemove.addEventListener('click', () => {
+  b64 = null; mime = null;
+  previewBox.classList.remove('visible');
+  fileInput.value = '';
+  btnConvert.disabled = true;
+  clearResult();
+});
+
+// Build prompt
+function buildPrompt(type) {
+  const tmpl = {
+    mc:    `\\begin{ex}\nNội dung câu hỏi\n\\choice\n{Phương án A}{Phương án B}{Phương án C}{Phương án D}\n\\loigiai{}\n\\end{ex}`,
+    tf:    `\\begin{ex}\nNội dung câu hỏi\n\\choiceTFt\n{Mệnh đề A}{Mệnh đề B}{Mệnh đề C}{Mệnh đề D}\n\\loigiai{}\n\\end{ex}`,
+    short: `\\begin{ex}\nNội dung câu hỏi\n\\shortans{đáp án}\n\\loigiai{}\n\\end{ex}`,
+    essay: `\\begin{ex}\nNội dung câu hỏi\n\\loigiai{lời giải nếu có}\n\\end{ex}`
+  };
+
+  const guide = type === 'auto'
+    ? `Phân tích loại câu hỏi trong ảnh rồi chọn template phù hợp:
+- Có 4 đáp án chọn 1 đúng → dùng \\choice
+- Có 4 mệnh đề đúng/sai → dùng \\choiceTFt
+- Yêu cầu điền số/kết quả → dùng \\shortans{}
+- Tự luận/chứng minh → chỉ dùng \\loigiai{}
+
+Các template:
+Trắc nghiệm 4 PA:
+${tmpl.mc}
+
+Đúng/Sai:
+${tmpl.tf}
+
+Trả lời ngắn:
+${tmpl.short}
+
+Tự luận:
+${tmpl.essay}`
+    : `Dùng cấu trúc sau:\n${tmpl[type]}`;
+
+  return `Bạn là chuyên gia chuyển đổi đề thi toán Việt Nam sang LaTeX dùng gói ex_text.
+
+${guide}
+
+Quy tắc bắt buộc:
+- Chỉ xuất code LaTeX thuần túy, KHÔNG giải thích, KHÔNG markdown backtick, KHÔNG dấu \`\`\`
+- Giữ nguyên nội dung câu hỏi từ ảnh, chuyển đổi chính xác
+- Công thức toán: $...$ (inline) hoặc \\[...\\] (display)
+- Nếu không có lời giải trong ảnh → \\loigiai{} để trống
+- Nếu có nhiều câu hỏi → xuất tất cả liên tiếp, mỗi câu một \\begin{ex}...\\end{ex}
+- Dùng amsmath, amssymb khi cần
+
+Xuất code LaTeX ngay bây giờ:`;
+}
+
+// Convert using Gemini API
+btnConvert.addEventListener('click', async () => {
+  const key = apiKeyInp.value.trim();
+  if (!key) { showError('Vui lòng nhập Google AI Studio API Key. Bấm "Lấy key miễn phí →" ở góc trên phải.'); return; }
+  if (!b64) return;
+
+  btnConvert.classList.add('loading');
+  btnConvert.disabled = true;
+  clearResult();
+
+  // Gemini API endpoint
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { inline_data: { mime_type: mime, data: b64 } },
+            { text: buildPrompt(qtype) }
+          ]
+        }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 2048
+        }
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      const msg = data.error?.message || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+
+    let latex = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (!latex) throw new Error('Không nhận được kết quả từ Gemini.');
+
+    // Strip markdown code fences if model added them
+    latex = latex.replace(/^```(?:latex)?\n?/i, '').replace(/\n?```$/i, '').trim();
+
+    showResult(latex);
+
+  } catch (err) {
+    let msg = err.message;
+    if (msg.includes('API_KEY_INVALID') || msg.includes('API key not valid')) {
+      msg = 'API Key không hợp lệ. Vui lòng kiểm tra lại tại aistudio.google.com/apikey';
+    } else if (msg.includes('RESOURCE_EXHAUSTED')) {
+      msg = 'Đã hết quota miễn phí hôm nay. Thử lại vào ngày mai hoặc dùng model khác.';
+    }
+    showError(msg);
+  } finally {
+    btnConvert.classList.remove('loading');
+    btnConvert.disabled = false;
+  }
+});
+
+// Syntax highlight
+function syntaxHL(code) {
+  return code
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/(\\begin|\\end)\{([^}]+)\}/g, '<span class="lt-env">$1{$2}</span>')
+    .replace(/(\\choice(?:TFt)?|\\shortans|\\loigiai)(?=[{\s\n])/g, '<span class="lt-cmd">$1</span>')
+    .replace(/(\\[a-zA-Z]+)/g, m => m.includes('<') ? m : `<span class="lt-cmd">${m}</span>`)
+    .replace(/([{}])/g, '<span class="lt-brace">$1</span>');
+}
+
+function showResult(latex) {
+  emptyState.style.display = 'none';
+  cheatsheet.style.display = 'none';
+  resultArea.innerHTML = `
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-lang">ex_text · LaTeX</span>
+      </div>
+      <pre>${syntaxHL(latex)}</pre>
+    </div>`;
+  btnCopy.style.display = 'flex';
+  btnClear.style.display = 'flex';
+  btnCopy._latex = latex;
+}
+
+function showError(msg) {
+  emptyState.style.display = 'none';
+  resultArea.innerHTML = `<div class="error-box">⚠️ <span>${msg}</span></div>`;
+  btnCopy.style.display = 'none';
+  btnClear.style.display = 'flex';
+}
+
+function clearResult() {
+  resultArea.innerHTML = '';
+  emptyState.style.display = 'flex';
+  cheatsheet.style.display = 'block';
+  btnCopy.style.display = 'none';
+  btnClear.style.display = 'none';
+}
+
+btnCopy.addEventListener('click', () => {
+  const latex = btnCopy._latex;
+  if (!latex) return;
+  navigator.clipboard.writeText(latex).then(() => {
+    btnCopy.textContent = '✓ Đã copy!';
+    btnCopy.classList.add('copied');
+    setTimeout(() => { btnCopy.textContent = '⎘ Copy'; btnCopy.classList.remove('copied'); }, 2000);
+  });
+});
+btnClear.addEventListener('click', clearResult);
+</script>
+</body>
+</html>
